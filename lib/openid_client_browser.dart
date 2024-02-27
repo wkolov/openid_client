@@ -50,7 +50,7 @@ class Authenticator {
   }
 
   /// Redirects the browser to the logout URI.
-  void logout() async {
+  Future<void> logout() async {
     var c = await credential;
     if (c == null) return;
     var uri = c.generateLogoutUrl(
