@@ -8,7 +8,7 @@ Future<Credential> authenticate(Client client,
     {List<String> scopes = const []}) async {
   // create a function to open a browser with an url
   urlLauncher(String url) async {
-    var uri = Uri.parse(url);
+    final uri = Uri.parse(url);
     if (await canLaunchUrl(uri) || Platform.isAndroid) {
       await launchUrl(uri);
     } else {
@@ -17,11 +17,11 @@ Future<Credential> authenticate(Client client,
   }
 
   // create an authenticator
-  var authenticator = io.Authenticator(client,
+  final authenticator = io.Authenticator(client,
       scopes: scopes, port: 4000, urlLancher: urlLauncher);
 
   // starts the authentication
-  var c = await authenticator.authorize();
+  final c = await authenticator.authorize();
 
   // close the webview when finished
   if (Platform.isAndroid || Platform.isIOS) {
@@ -34,4 +34,7 @@ Future<Credential> authenticate(Client client,
 Future<Credential?> getRedirectResult(Client client,
     {List<String> scopes = const []}) async {
   return null;
+}
+
+Future<void> logout(Client client, {List<String> scopes = const []}) async {
 }
