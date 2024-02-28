@@ -1,6 +1,3 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:openid_client/openid_client.dart';
 import 'openid_io.dart' if (dart.library.html) 'openid_browser.dart';
