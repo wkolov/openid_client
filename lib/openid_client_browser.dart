@@ -61,18 +61,26 @@ class Authenticator {
   }
 
   static Future<Credential?> _credentialFromUri(Flow flow) async {
-    var uri = Uri.parse(window.location.href);
-    var iframe = uri.queryParameters['iframe'] != null;
-    uri = Uri(query: uri.fragment);
-    var q = uri.queryParameters;
+    final href = window.location.href;
+/*
+    print('---------------------------------------------------------');
+    print('window.location.href = $href');
+    print('---------------------------------------------------------');
+*/
+    var uri = Uri.parse(href);
+    final iframe = uri.queryParameters['iframe'] != null;
+    // uri = Uri(query: uri.fragment);
+    final q = uri.queryParameters;
     if (q.containsKey('access_token') ||
         q.containsKey('code') ||
         q.containsKey('id_token')) {
+/*
       window.history.replaceState(
-          '', '', Uri.parse(window.location.href).removeFragment().toString());
+          '', '', Uri.parse(href).removeFragment().toString());
       window.localStorage.remove('openid_client:state');
+*/
 
-      var c = await flow.callback(q.cast());
+      final c = await flow.callback(q.cast());
       if (iframe) window.parent!.postMessage(c.response, '*');
       return c;
     }

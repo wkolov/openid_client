@@ -464,10 +464,7 @@ class Flow {
       : this._(
             FlowType.implicit,
             [
-              'token id_token',
-              'id_token token',
-              'id_token',
-              'token',
+              'code',
             ].firstWhere((v) =>
                 client.issuer.metadata.responseTypesSupported.contains(v)),
             client,
@@ -539,9 +536,10 @@ class Flow {
           body: {
             'grant_type': 'authorization_code',
             'code': code,
-            'redirect_uri': redirectUri.toString(),
+            'redirect_uri': '${redirectUri.origin}/',
+            // 'redirect_uri': redirectUri.origin,
             'client_id': client.clientId,
-            'client_secret': client.clientSecret
+            // 'client_secret': client.clientSecret
           },
           client: client.httpClient);
     } else if (methods.contains('client_secret_basic')) {
@@ -588,10 +586,15 @@ class Flow {
     if (type == FlowType.jwtBearer) {
       var code = response['jwt'];
       return Credential._(client, await _getToken(code), null);
-    } else if (response.containsKey('code') &&
+    } else if (response.containsKey('code')/* &&
         (type == FlowType.proofKeyForCodeExchange ||
-            client.clientSecret != null)) {
+            client.clientSecret != null)*/) {
       var code = response['code'];
+/*
+      print('---------------------------------------------------------');
+      print('code in callback = $code');
+      print('---------------------------------------------------------');
+*/
       return Credential._(client, await _getToken(code), null);
     } else if (response.containsKey('access_token') ||
         response.containsKey('id_token')) {
