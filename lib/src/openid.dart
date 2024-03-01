@@ -478,6 +478,7 @@ class Flow {
             additionalParameters: {
               if (device != null) 'device': device,
               if (prompt != null) 'prompt': prompt,
+              'response_mode': 'fragment',
             });
 
   Flow.jwtBearer(Client client) : this._(FlowType.jwtBearer, null, client);
