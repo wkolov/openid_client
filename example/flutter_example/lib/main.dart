@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:openid_client/openid_client.dart';
-import 'openid_io.dart' if (dart.library.html) 'openid_browser.dart';
+import 'openid_browser.dart';
 
-const keycloakUri = 'https://vpp-app.bop-dev.de/auth/realms/vms';
-const scopes = ['openid'];
+// const keycloakUri = 'https://vpp-app.bop-dev.de/auth/realms/vms';
+const keycloakUri = 'http://localhost:8080/auth/realms/vms';
+const clientId = 'vms-services';
+const scopes = <String>[];
 
 Credential? credential;
 
@@ -12,8 +14,6 @@ late final Client client;
 Future<Client> getClient() async {
   var uri = Uri.parse(keycloakUri);
   // if (!kIsWeb && Platform.isAndroid) uri = uri.replace(host: '10.0.2.2');
-  var clientId = 'vms-services';
-
   var issuer = await Issuer.discover(uri);
   return Client(issuer, clientId);
 }
@@ -47,14 +47,21 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   UserInfo? userInfo;
+  TokenResponse? tokenResponse;
 
   @override
   void initState() {
     if (credential != null) {
-      credential!.getUserInfo().then((userInfo) {
+      credential!
+          .getUserInfo()
+          .then((userInfo) {
         setState(() {
           this.userInfo = userInfo;
         });
+      })
+          .then((value) => credential!.getTokenResponse())
+          .then((tokenResponse) {
+        this.tokenResponse = tokenResponse;
       });
     }
     super.initState();
@@ -73,6 +80,8 @@ class _MyHomePageState extends State<MyHomePage> {
             if (userInfo != null) ...[
               Text('Hello ${userInfo!.name}'),
               Text(userInfo!.email ?? ''),
+              Text('refresh_token: ${tokenResponse?.refreshToken}', maxLines: 1,),
+              Text('access_token: ${tokenResponse?.accessToken}', maxLines: 1,),
               OutlinedButton(
                   child: const Text('Logout'),
                   onPressed: () async {

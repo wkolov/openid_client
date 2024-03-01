@@ -62,11 +62,6 @@ class Authenticator {
 
   static Future<Credential?> _credentialFromUri(Flow flow) async {
     final href = window.location.href;
-/*
-    print('---------------------------------------------------------');
-    print('window.location.href = $href');
-    print('---------------------------------------------------------');
-*/
     var uri = Uri.parse(href);
     final iframe = uri.queryParameters['iframe'] != null;
     uri = Uri(query: uri.fragment);

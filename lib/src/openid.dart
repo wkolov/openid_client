@@ -538,7 +538,7 @@ class Flow {
             'grant_type': 'authorization_code',
             'code': code,
             'redirect_uri': '${redirectUri.origin}/',
-            // 'redirect_uri': redirectUri.origin,
+            // 'redirect_uri': redirectUri.toString(),
             'client_id': client.clientId,
             // 'client_secret': client.clientSecret
           },
@@ -591,11 +591,6 @@ class Flow {
         (type == FlowType.proofKeyForCodeExchange ||
             client.clientSecret != null)*/) {
       var code = response['code'];
-/*
-      print('---------------------------------------------------------');
-      print('code in callback = $code');
-      print('---------------------------------------------------------');
-*/
       return Credential._(client, await _getToken(code), null);
     } else if (response.containsKey('access_token') ||
         response.containsKey('id_token')) {
