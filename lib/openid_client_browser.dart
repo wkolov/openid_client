@@ -74,11 +74,9 @@ class Authenticator {
     if (q.containsKey('access_token') ||
         q.containsKey('code') ||
         q.containsKey('id_token')) {
-/*
-      window.history.replaceState(
-          '', '', Uri.parse(href).removeFragment().toString());
+
+      window.history.replaceState('', '', Uri.parse(href).removeFragment().toString());
       window.localStorage.remove('openid_client:state');
-*/
 
       final c = await flow.callback(q.cast());
       if (iframe) window.parent!.postMessage(c.response, '*');
