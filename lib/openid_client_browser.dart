@@ -69,7 +69,7 @@ class Authenticator {
 */
     var uri = Uri.parse(href);
     final iframe = uri.queryParameters['iframe'] != null;
-    // uri = Uri(query: uri.fragment);
+    uri = Uri(query: uri.fragment);
     final q = uri.queryParameters;
     if (q.containsKey('access_token') ||
         q.containsKey('code') ||
