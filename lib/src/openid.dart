@@ -537,8 +537,8 @@ class Flow {
           body: {
             'grant_type': 'authorization_code',
             'code': code,
-            'redirect_uri': '${redirectUri.origin}/',
-            // 'redirect_uri': redirectUri.toString(),
+            // 'redirect_uri': '${redirectUri.origin}/',
+            'redirect_uri': redirectUri.toString(),
             'client_id': client.clientId,
             // 'client_secret': client.clientSecret
           },
