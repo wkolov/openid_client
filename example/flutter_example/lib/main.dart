@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:openid_client/openid_client.dart';
-import 'openid_browser.dart';
+import 'openid_io.dart' if (dart.library.js_interop) 'openid_browser.dart';
 
 // const keycloakUri = 'https://vpp-app.bop-dev.de/auth/realms/vms';
 const keycloakUri = 'http://localhost:8080/auth/realms/vms';

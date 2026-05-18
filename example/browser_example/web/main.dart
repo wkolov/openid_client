@@ -1,4 +1,4 @@
-import 'dart:html';
+import 'package:web/web.dart' hide Client;
 
 import 'package:openid_client/openid_client_browser.dart';
 
@@ -23,14 +23,15 @@ Future<void> main() async {
   if (credential != null) {
     Future<void> refresh() async {
       var userData = await credential!.getUserInfo();
-      document.querySelector('#name')!.text = userData.name!;
-      document.querySelector('#email')!.text = userData.email!;
-      document.querySelector('#issuedAt')!.text =
+      document.querySelector('#name')!.textContent = userData.name!;
+      document.querySelector('#email')!.textContent = userData.email!;
+      document.querySelector('#issuedAt')!.textContent =
           credential!.idToken.claims.issuedAt.toIso8601String();
     }
 
     await refresh();
-    document.querySelector('#when-logged-in')!.style.display = 'block';
+    (document.querySelector('#when-logged-in') as HTMLElement).style.display =
+        'block';
     document.querySelector('#logout')!.onClick.listen((_) async {
       authenticator.logout();
     });
@@ -39,7 +40,8 @@ Future<void> main() async {
       await refresh();
     });
   } else {
-    document.querySelector('#when-logged-out')!.style.display = 'block';
+    (document.querySelector('#when-logged-out') as HTMLElement).style.display =
+        'block';
     document.querySelector('#login')!.onClick.listen((_) async {
       authenticator.authorize();
     });

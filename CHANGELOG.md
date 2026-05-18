@@ -1,3 +1,28 @@
+## 0.4.10+1
+
+ - **FIX**: dedupe token refresh future. ([69e638bc](https://github.com/appsup-dart/openid_client/commit/69e638bcdefc43f09b58c87ef5e55868d48b63e6))
+
+## 0.4.10
+
+ - **FIX**: use revoke uri instead of token uri (pr [#106](https://github.com/appsup-dart/openid_client/issues/106) of bakiller). ([5c40d924](https://github.com/appsup-dart/openid_client/commit/5c40d924af044048dc18533508c8efd170577bf8))
+ - **FIX**: default redirectUri with port 80 does not work on linux (pr [#117](https://github.com/appsup-dart/openid_client/issues/117) of timalenustmf). ([97a17741](https://github.com/appsup-dart/openid_client/commit/97a1774121dcc0f1c10c6f0347573c2dfa2ac5c4))
+ - **FEAT**: adds implementation for RP initiated logout (pr [#112](https://github.com/appsup-dart/openid_client/issues/112) of svsk417). ([59ee7128](https://github.com/appsup-dart/openid_client/commit/59ee71287f17a7105fbc1ec0f7bc58f7a59f95b9))
+
+## 0.4.9+2
+
+ - **FIX**: Move early return check before creating completer to prevent incomplete completer bug. ([793bffa3](https://github.com/appsup-dart/openid_client/commit/793bffa3387ed21650d9ea3d1916ee4f79b20121))
+ - **FIX**: Prevent race condition in Credential.getTokenResponse. ([e38d76a9](https://github.com/appsup-dart/openid_client/commit/e38d76a944a9e07a488e9d3cba5876bc120699d1))
+
+## 0.4.9+1
+
+ - **REFACTOR**: set min sdk to 3.0.0. ([754fa497](https://github.com/appsup-dart/openid_client/commit/754fa49782a2d0f9c51251f73d2270e44db7262d))
+ - **REFACTOR**: support for pointycastle ^4.0.0. ([64480c07](https://github.com/appsup-dart/openid_client/commit/64480c073945767d0ab8580bfa77b49d4cf08ab0))
+
+## 0.4.9
+
+ - **REFACTOR**: migrate from 'dart:html' to 'package:web'. ([9fd34b02](https://github.com/appsup-dart/openid_client/commit/9fd34b028721edd2b303eadd555782d6f38be39e))
+ - **FEAT**: client credentials flow. ([86425c1d](https://github.com/appsup-dart/openid_client/commit/86425c1d07cdfb17af92688c801f7c546ee6d582))
+
 ## 0.4.8
 
  - **FIX**: use proper authentication in revoke endpoint (issue [#83](https://github.com/appsup-dart/openid_client/issues/83)). ([09d49652](https://github.com/appsup-dart/openid_client/commit/09d49652760a9931977288f24f32caff51a1bc76))

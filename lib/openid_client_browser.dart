@@ -1,5 +1,7 @@
+import 'dart:js_interop';
+
 import 'openid_client.dart';
-import 'dart:html' hide Credential, Client;
+import 'package:web/web.dart' hide Credential, Client;
 import 'dart:async';
 export 'openid_client.dart';
 
@@ -38,14 +40,14 @@ class Authenticator {
       {Iterable<String> scopes = const [], String? device, String? prompt})
       : this._(Flow.implicit(client,
             device: device,
-            state: window.localStorage['openid_client:state'],
+            state: window.localStorage.getItem('openid_client:state'),
             prompt: prompt)
           ..scopes.addAll(scopes)
           ..redirectUri = Uri.parse(window.location.href).removeFragment());
 
   /// Redirects the browser to the authentication URI.
   void authorize() {
-    window.localStorage['openid_client:state'] = flow.state;
+    window.localStorage.setItem('openid_client:state', flow.state);
     window.location.href = flow.authenticationUri.toString();
   }
 
@@ -69,12 +71,12 @@ class Authenticator {
     if (q.containsKey('access_token') ||
         q.containsKey('code') ||
         q.containsKey('id_token')) {
+      window.history.replaceState(''.toJS, '',
+          Uri.parse(window.location.href).removeFragment().toString());
+      window.localStorage.removeItem('openid_client:state');
 
-      window.history.replaceState('', '', Uri.parse(href).removeFragment().toString());
-      window.localStorage.remove('openid_client:state');
-
-      final c = await flow.callback(q.cast());
-      if (iframe) window.parent!.postMessage(c.response, '*');
+      var c = await flow.callback(q.cast());
+      if (iframe) window.parent!.postMessage(c.response?.toJSBox, '*'.toJS);
       return c;
     }
     return null;
@@ -90,9 +92,9 @@ class Authenticator {
   /// response.
   Future<Credential> trySilentRefresh(
       {Duration timeout = const Duration(seconds: 20)}) async {
-    var iframe = IFrameElement();
+    var iframe = HTMLIFrameElement();
     var url = flow.authenticationUri;
-    window.localStorage['openid_client:state'] = flow.state;
+    window.localStorage.setItem('openid_client:state', flow.state);
     iframe.src = url.replace(queryParameters: {
       ...url.queryParameters,
       'prompt': 'none',
@@ -106,28 +108,29 @@ class Authenticator {
     var event = await window.onMessage.first.timeout(timeout).whenComplete(() {
       iframe.remove();
     });
-    if (event.data is Map) {
+
+    var data = event.data?.dartify();
+    if (data is Map) {
       var current = await credential;
       if (current == null) {
         return flow.client.createCredential(
-          accessToken: event.data['access_token'],
-          expiresAt: event.data['expires_at'] == null
+          accessToken: data['access_token'],
+          expiresAt: data['expires_at'] == null
               ? null
               : DateTime.fromMillisecondsSinceEpoch(
-                  int.parse(event.data['expires_at'].toString()) * 1000),
-          refreshToken: event.data['refresh_token'],
-          expiresIn: event.data['expires_in'] == null
+                  int.parse(data['expires_at'].toString()) * 1000),
+          refreshToken: data['refresh_token'],
+          expiresIn: data['expires_in'] == null
               ? null
-              : Duration(
-                  seconds: int.parse(event.data['expires_in'].toString())),
-          tokenType: event.data['token_type'],
-          idToken: event.data['id_token'],
+              : Duration(seconds: int.parse(data['expires_in'].toString())),
+          tokenType: data['token_type'],
+          idToken: data['id_token'],
         );
       } else {
-        return current..updateToken((event.data as Map).cast());
+        return current..updateToken(data.cast());
       }
     } else {
-      throw Exception('${event.data}');
+      throw Exception('$data');
     }
   }
 }
