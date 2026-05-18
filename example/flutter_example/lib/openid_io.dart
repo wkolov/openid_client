@@ -25,7 +25,7 @@ Future<Credential> authenticate(Client client,
 
   // close the webview when finished
   if (Platform.isAndroid || Platform.isIOS) {
-    closeInAppWebView();
+    await closeInAppWebView();
   }
 
   return c;
