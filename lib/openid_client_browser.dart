@@ -19,9 +19,14 @@ export 'openid_client.dart';
 /// [Credential] after the user has signed in and the browser is redirected to
 /// the app. Otherwise, it completes with `null`.
 ///
-/// The state is not persisted in the browser, so the user will have to sign in
-/// again after a page refresh. If you want to persist the state, you'll have to
-/// store and restore the credential yourself. You can listen to the
+/// Uses the authorization code flow with PKCE. The `state` and the PKCE code
+/// verifier are kept in `localStorage` for the duration of the redirect, since
+/// a fresh [Flow] would otherwise generate a new verifier and the token
+/// exchange would fail.
+///
+/// The credential itself is not persisted, so the user will have to sign in
+/// again after a page refresh. If you want to persist it, you'll have to store
+/// and restore the credential yourself. You can listen to the
 /// [Credential.onTokenChanged] event to be notified when the credential changes.
 class Authenticator {
   /// The [Flow] used for authentication.
@@ -38,16 +43,30 @@ class Authenticator {
 
   Authenticator(Client client,
       {Iterable<String> scopes = const [], String? device, String? prompt})
-      : this._(Flow.implicit(client,
-            device: device,
-            state: window.localStorage.getItem('openid_client:state'),
-            prompt: prompt)
+      : this._(Flow.authorizationCodeWithPKCE(client,
+            state: window.localStorage.getItem(_stateKey),
+            codeVerifier: window.localStorage.getItem(_codeVerifierKey),
+            prompt: prompt,
+            additionalParameters: {
+              if (device != null) 'device': device,
+              // This class reads the authorization response from the fragment.
+              'response_mode': 'fragment',
+            })
           ..scopes.addAll(scopes)
           ..redirectUri = Uri.parse(window.location.href).removeFragment());
 
+  static const _stateKey = 'openid_client:state';
+  static const _codeVerifierKey = 'openid_client:code_verifier';
+
+  /// Keeps what the token exchange after the redirect will need.
+  void _rememberFlow() {
+    window.localStorage.setItem(_stateKey, flow.state);
+    window.localStorage.setItem(_codeVerifierKey, flow.codeVerifier);
+  }
+
   /// Redirects the browser to the authentication URI.
   void authorize() {
-    window.localStorage.setItem('openid_client:state', flow.state);
+    _rememberFlow();
     window.location.href = flow.authenticationUri.toString();
   }
 
@@ -63,17 +82,17 @@ class Authenticator {
   }
 
   static Future<Credential?> _credentialFromUri(Flow flow) async {
-    final href = window.location.href;
-    var uri = Uri.parse(href);
-    final iframe = uri.queryParameters['iframe'] != null;
+    var uri = Uri.parse(window.location.href);
+    var iframe = uri.queryParameters['iframe'] != null;
     uri = Uri(query: uri.fragment);
-    final q = uri.queryParameters;
+    var q = uri.queryParameters;
     if (q.containsKey('access_token') ||
         q.containsKey('code') ||
         q.containsKey('id_token')) {
       window.history.replaceState(''.toJS, '',
           Uri.parse(window.location.href).removeFragment().toString());
-      window.localStorage.removeItem('openid_client:state');
+      window.localStorage.removeItem(_stateKey);
+      window.localStorage.removeItem(_codeVerifierKey);
 
       var c = await flow.callback(q.cast());
       if (iframe) window.parent!.postMessage(c.response?.toJSBox, '*'.toJS);
@@ -94,7 +113,7 @@ class Authenticator {
       {Duration timeout = const Duration(seconds: 20)}) async {
     var iframe = HTMLIFrameElement();
     var url = flow.authenticationUri;
-    window.localStorage.setItem('openid_client:state', flow.state);
+    _rememberFlow();
     iframe.src = url.replace(queryParameters: {
       ...url.queryParameters,
       'prompt': 'none',

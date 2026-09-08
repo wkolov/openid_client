@@ -1,3 +1,20 @@
+## 0.4.10+2
+
+Fork changes, not released upstream.
+
+ - **FIX**: `Authenticator.logout()` on web returned `void` although it is
+   `async`, so callers could neither await it nor observe its errors. It now
+   returns `Future<void>`.
+ - **FEAT**: the browser `Authenticator` uses the authorization code flow with
+   PKCE instead of the implicit flow. Implicit is removed in OAuth 2.1 and
+   returns no refresh token.
+ - **FIX**: the PKCE code verifier is kept in `localStorage` alongside `state`
+   for the duration of the redirect. Without it the flow rebuilt after the
+   redirect generated a new verifier and the token exchange failed with
+   `invalid_grant` — which made PKCE unusable for redirect-based clients.
+ - **FEAT**: `Flow.codeVerifier` exposes the verifier so a redirect-based
+   client can persist and restore it.
+
 ## 0.4.10+1
 
  - **FIX**: dedupe token refresh future. ([69e638bc](https://github.com/appsup-dart/openid_client/commit/69e638bcdefc43f09b58c87ef5e55868d48b63e6))

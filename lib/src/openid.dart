@@ -480,7 +480,10 @@ class Flow {
       : this._(
             FlowType.implicit,
             [
-              'code',
+              'token id_token',
+              'id_token token',
+              'id_token',
+              'token',
             ].firstWhere((v) =>
                 client.issuer.metadata.responseTypesSupported.contains(v)),
             client,
@@ -494,7 +497,6 @@ class Flow {
             additionalParameters: {
               if (device != null) 'device': device,
               if (prompt != null) 'prompt': prompt,
-              'response_mode': 'fragment',
             });
 
   Flow.jwtBearer(Client client) : this._(FlowType.jwtBearer, null, client);
@@ -506,6 +508,14 @@ class Flow {
       .replace(queryParameters: _authenticationUriParameters);
 
   late Map<String, String> _proofKeyForCodeExchange;
+
+  /// The PKCE code verifier of this flow.
+  ///
+  /// A redirect-based client has to persist this and pass it back through
+  /// [Flow.authorizationCodeWithPKCE]'s `codeVerifier` after the redirect.
+  /// Without it a fresh flow generates a new verifier and the token exchange
+  /// fails with `invalid_grant`.
+  String get codeVerifier => _proofKeyForCodeExchange['code_verifier']!;
 
   final String _nonce = _randomString(16);
 
@@ -566,10 +576,9 @@ class Flow {
           body: {
             'grant_type': 'authorization_code',
             'code': code,
-            // 'redirect_uri': '${redirectUri.origin}/',
             'redirect_uri': redirectUri.toString(),
             'client_id': client.clientId,
-            // 'client_secret': client.clientSecret
+            'client_secret': client.clientSecret
           },
           client: client.httpClient);
     } else if (methods.contains('client_secret_basic')) {
@@ -631,9 +640,9 @@ class Flow {
     if (type == FlowType.jwtBearer) {
       var code = response['jwt'];
       return Credential._(client, await _getToken(code), null);
-    } else if (response.containsKey('code')/* &&
+    } else if (response.containsKey('code') &&
         (type == FlowType.proofKeyForCodeExchange ||
-            client.clientSecret != null)*/) {
+            client.clientSecret != null)) {
       var code = response['code'];
       return Credential._(client, await _getToken(code), null);
     } else if (response.containsKey('access_token') ||
